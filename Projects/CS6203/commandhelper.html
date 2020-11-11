@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <script src="jquery-3.4.1.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="vue.js"></script>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css"></link>
+    <title>Command helper for running CS6203 HFL project</title>
+
+</head>
+
+<body>
+    <div class="row" style="margin-top: 40px;">
+        <div style="margin:0 auto;width: 60%;min-width: 500px;" id="serviceList">
+            <h4 style="text-align: center;">Command helper for running CS6203 HFL project</h4>
+            <p>Note: you can change your configuration by the following form, and the command then will automatically changed in the result section.</p>
+            <div style="overflow: auto;margin-bottom: 10px">
+                  <div class="form-group">
+                    <label for="exampleFormControlSelect2">Choose which algorithm do you want to run.</label>
+                    <select v-model="alg" class="form-control" id="exampleFormControlSelect2">
+                      <option value="baseline.py">Baseline (all the data are trained on a single machine)</option>
+                      <option value="federated_main.py">Federated Averaging Simulation (simulate FedAvg with a single program)</option>
+                      <option value="fedavg_server.py">Federated Averaging - Real decentralized (run FedAvg on multiple processes)</option>
+                      <option value="federated_brain.py">FedBrain (federated learning without a central server)</option>
+                      <option value="federated_bran_v2.py">FedBrain_v2 (federated learning without a central server)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlSelect2">Choose which dataset do you want to train on.</label>
+                    <select v-model="dataset" class="form-control">
+                        <option>	mnist	</option>
+                        <option>	femnist	</option>
+                        <option>	cifar10	</option>
+                        <option>	chest_xray	</option>
+                        <option>	COVID19	</option>
+                        <option>	malaria_cell_images	</option>
+                        <option>	HAM10000	</option>
+                        <option>	heart_disease	</option>
+                        <option>	COVID19_twitter	</option>
+                        <option>	heartbeat	</option>                        
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlInput1">Number of users (clients):</label>
+                    <input type="number" class="form-control" min=1 id="exampleFormControlInput1" v-model="n">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlInput1">The fraction of clients you want to select every round: </label>
+                    <input type="number" class="form-control" max=1 min=0.01 id="exampleFormControlInput1" v-model="frac">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlInput1">Number of epochs: </label>
+                    <input type="number" class="form-control"  min=1 id="exampleFormControlInput1" v-model="epochs">
+                  </div>
+                  <div class="form-group">
+                    <label for="Command generated">Command generated</label>
+                    <textarea class="form-control" style="height: 400px;" id="exampleFormControlTextarea1" rows="3">cd ~/Federated-Learning-PyTorch/MP-SPDZ/&#13;
+./Scripts/setup-clients.sh {{n}}; ./Scripts/cs6203.sh add_by_socket & python run_client.py {{n}};
+cd ~/Federated-Learning-PyTorch/src&#13;
+python {{alg}}  --dataset={{dataset}} --num_users={{n}} --frac={{frac}} --iid=1 --epochs={{epochs}} --optimizer=adam --gpu=0  --secret_share=0 --parallel=0 --address=sigx1.d2.comp.nus.edu.sg
+
+                    </textarea>
+                  </div>
+            </div>
+            
+        </div>
+    </div>
+
+</body>
+
+</html>
+<script>
+    var app = new Vue({
+        el: '#serviceList',
+        data: {
+            list: [],
+            alg:"baseline.py",
+            n: 3,
+            frac: 1.0,
+            dataset:"mnist",
+            epochs: 100,
+            command: "cd ~/Federated-Learning-PyTorch/src", //记录服务行为
+        },
+        methods: {
+            modifyService: function(id, url) {
+                let message = { //显示flowchart
+                    type: 1, //消息类型，传递链接
+                    message: {
+                        "id": id,
+                    }
+                };
+                ws.send(JSON.stringify(message));
+                window.location.href = url; //跳转链接
+            },
+            browseService: function(id) {
+                window.location.href = "serviceInfo.html?id=" + id; //跳转链接
+            },
+            deleteService: function(id) {
+                if (confirm("确定要删除服务吗？")) {
+                    $.get("http://183.129.170.180:8041/backEnd/deleteService?id=" + id, function(res) {
+                        $.get("http://183.129.170.180:8041/backEnd/queryServices", function(re) {
+                            result = re.sort(desc);
+                            app.$data.list = result;
+                        });
+                    });
+
+                }
+            },
+        }
+    });
+
+</script>
