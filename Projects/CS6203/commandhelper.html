@@ -16,16 +16,20 @@
     <div class="row" style="margin-top: 40px;">
         <div style="margin:0 auto;width: 60%;min-width: 500px;" id="serviceList">
             <h4 style="text-align: center;">Command helper for running CS6203 HFL project</h4>
-            <p>Note: you can change your configuration by the following form, and the command then will automatically changed in the result section.</p>
+            <p>Note: you can change your configuration by the following form, and the command then will automatically changed in the result section. <b>Only the arguments that need to type for a long time will be shown </b> for configuration. </p>
+            <p>For different tasks, there maybe some arguments that are unused, it's fine.</p>
             <div style="overflow: auto;margin-bottom: 10px">
                   <div class="form-group">
                     <label for="exampleFormControlSelect2">Choose which algorithm do you want to run.</label>
                     <select v-model="alg" class="form-control" id="exampleFormControlSelect2">
-                      <option value="baseline.py">Baseline (all the data are trained on a single machine)</option>
+                      <option value="baseline_main.py">Baseline (all the data are trained on a single machine)</option>
                       <option value="federated_main.py">Federated Averaging Simulation (simulate FedAvg with a single program)</option>
-                      <option value="fedavg_server.py">Federated Averaging - Real decentralized (run FedAvg on multiple processes)</option>
+                      <option value="dataset_split.py">Dataset Split for Federated Averaging Distributed version.</option>
+                      <option value="fedavg_coordinator.py">Federated Averaging Coordinator - Real decentralized (run FedAvg on multiple processes)</option>
+                      <option value="fedavg_client.py">Federated Averaging Workers - Real decentralized (run FedAvg on multiple processes)</option>
+                      <option value="federated_distributed_random.py">Federated distributed random algorithm</option>
                       <option value="federated_brain.py">FedBrain (federated learning without a central server)</option>
-                      <option value="federated_bran_v2.py">FedBrain_v2 (federated learning without a central server)</option>
+                      <option value="federated_brain_v2.py">FedBrain_v2 (federated learning without a central server)</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -36,33 +40,16 @@
                         <option>	cifar10	</option>
                         <option>	chest_xray	</option>
                         <option>	COVID19	</option>
-                        <option>	malaria_cell_images	</option>
-                        <option>	HAM10000	</option>
                         <option>	heart_disease	</option>
                         <option>	COVID19_twitter	</option>
-                        <option>	heartbeat	</option>                        
+                        <option>	heartbeat	</option>     
+                        <option>	malaria_cell_images	</option>
+                        <option>	HAM10000	</option>                   
                     </select>
                   </div>
-                  <div class="form-group">
-                    <label for="exampleFormControlInput1">Number of users (clients):</label>
-                    <input type="number" class="form-control" min=1 id="exampleFormControlInput1" v-model="n">
-                  </div>
-                  <div class="form-group">
-                    <label for="exampleFormControlInput1">The fraction of clients you want to select every round: </label>
-                    <input type="number" class="form-control" max=1 min=0.01 id="exampleFormControlInput1" v-model="frac">
-                  </div>
-                  <div class="form-group">
-                    <label for="exampleFormControlInput1">Number of epochs: </label>
-                    <input type="number" class="form-control"  min=1 id="exampleFormControlInput1" v-model="epochs">
-                  </div>
-                  <div class="form-group">
+                   <div class="form-group">
                     <label for="Command generated">Command generated</label>
-                    <textarea class="form-control" style="height: 400px;" id="exampleFormControlTextarea1" rows="3">cd ~/Federated-Learning-PyTorch/MP-SPDZ/&#13;
-./Scripts/setup-clients.sh {{n}}; ./Scripts/cs6203.sh add_by_socket & python run_client.py {{n}};
-cd ~/Federated-Learning-PyTorch/src&#13;
-python {{alg}}  --dataset={{dataset}} --num_users={{n}} --frac={{frac}} --iid=1 --epochs={{epochs}} --optimizer=adam --gpu=0  --secret_share=0 --parallel=0 --address=sigx1.d2.comp.nus.edu.sg
-
-                    </textarea>
+                    <textarea class="form-control" style="height: 400px;" id="exampleFormControlTextarea1" rows="3">python {{alg}} --optimizer=adam --lr=0.001 --gpu=-1 --secret_share=0 --parallel=0 --local_ep=5 --local_bs=50 --ss_address={{ss_address}} --frac={{frac}}  --epochs={{epochs}} --worker_number=0 --dataset={{dataset}} --num_users={{n}} --iid=1</textarea>
                   </div>
             </div>
             
@@ -77,11 +64,12 @@ python {{alg}}  --dataset={{dataset}} --num_users={{n}} --frac={{frac}} --iid=1 
         el: '#serviceList',
         data: {
             list: [],
-            alg:"baseline.py",
+            alg:"baseline_main.py",
             n: 3,
-            frac: 1.0,
+            frac: 0.7,
             dataset:"mnist",
             epochs: 100,
+            ss_address: "localhost",
             command: "cd ~/Federated-Learning-PyTorch/src", //记录服务行为
         },
         methods: {
